@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+"""
+Script that plots 2D colormap of vort input files
+Author : Amy Hodgkin 18 Oct 2021
+"""
+import math
+import csv
+import matplotlib
+matplotlib.use('Agg')
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+
+nx=387
+ny=387
+lx=12
+ly=12
+
+X=np.linspace(0,12,num=nx)
+Y=np.linspace(0,12,num=ny)
+cmap=plt.get_cmap('jet')
+
+#colorbar min and max
+maxvalue=0.5
+minvalue=-0.5
+
+fontsize=14
+
+for i in range(4):
+    #load file
+    vort=np.genfromtxt("vort"+str(i+1).zfill(4))
+    [a,b]=np.shape(vort)
+
+    #reshape 3 columns to 2D matrix (nx,ny)
+    #convert x and y to nx and ny
+    vort[:,0]=vort[:,0]*387/12
+    vort[:,1]=vort[:,1]*387/12
+    vort2D=np.zeros((nx,ny))
+    for index in range(a):
+        vort2D[int(vort[index,0]),int(vort[index,1])]=vort[index,2]
+    
+    #plot
+    fig,ax = plt.subplots()
+    plt.figure((i+1),figsize=(10,10), edgecolor='none')
+    im=ax.pcolormesh(X,Y,np.transpose(vort2D),cmap=cmap,vmax=maxvalue,vmin=minvalue)
+    ax.set_xlabel('X',fontsize=fontsize)
+    ax.set_ylabel('Y',fontsize=fontsize)
+    plt.tick_params(labelsize=fontsize)
+    plt.gca().set_aspect('auto')
+    plt.title(r"vort000"+str(i+1),fontsize=fontsize)
+   
+    cb=plt.colorbar(im,ax=ax)
+    cb.ax.tick_params(labelsize=fontsize-2)
+    plt.grid(b=True, which='major', color='#666666', linestyle='-')
+    plt.savefig('vort2D_000'+str(i+1)+'.png')
+
