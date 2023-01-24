@@ -35,7 +35,7 @@ program navierstokes
 
   ! AB2 temporal scheme itemp=1
   ! RK3 temporal scheme itemp=2
-  itemp=1
+  itemp=2
 
 
   ! Subroutine for the initialisation of the variables 
@@ -45,7 +45,9 @@ program navierstokes
   !we need to define the time step
   dx=xlx/nx !mesh size in x
   dy=yly/ny !mesh sixe in y
-  CFL=0.25  !CFL number for time step
+  ! CFL=0.25  !CFL number for time step
+  !Task 2 and Task 3: Change CFL to 0.75
+  CFL = 0.75
   dlt=CFL*dlx
   print *,'The time step of the simulation is',dlt
   
@@ -299,7 +301,18 @@ subroutine derix4(phi,nx,ny,dfi,xlx)
   real(8),dimension(nx,ny) :: phi,dfi
   real(8) :: dlx,xlx,udx
   integer :: i,j,nx,ny
-	
+
+  dlx=xlx/nx
+  udx=1./(12.*dlx)
+  do j=1,ny
+     dfi(1,j)=udx*(-phi(3,j)+8*phi(2,j)-8*Phi(nx,j)+Phi(nx-1,j))
+     dfi(2,j)=udx*(-phi(4,j)+8*Phi(3,j)-8*phi(1,j)+Phi(nx,j))
+     do i=3,nx-2
+        dfi(i,j)=udx*(-phi(i+2,j)+8*Phi(i+1,j)-8*phi(i-1,j)+Phi(i-2,j))
+     enddo
+     dfi(1,j)=udx*(-phi(3,j)+8*phi(2,j)-8*Phi(nx,j)+Phi(nx-1,j))
+     dfi(nx,j)=udx*(phi(1,j)-phi(nx-1,j))
+  enddo
 
 	
   return
@@ -504,16 +517,25 @@ subroutine rkutta(rho,rou,rov,roe,fro,gro,fru,gru,frv,grv,&
   integer :: i,j,nx,ny,ns,k 
 !	
 !coefficient for RK sub-time steps
-!!        coef(1,1)=XXX
-!!        coef(1,2)=XXX
-!!        coef(1,3)=XXX
-!!        coef(2,1)=XXX
-!!        coef(2,2)=XXX
-!!        coef(2,3)=XXX
+  coef(1,1)=8./15*dlt
+  coef(1,2)=5./12*dlt
+  coef(1,3)=3./4*dlt
+  coef(2,1)=0.*dlt
+  coef(2,2)=-17./60*dlt
+  coef(2,3)=-5./12*dlt
 
   do j=1,ny
      do i=1,nx
-!!
+       rho(i,j)=rho(i,j)+coef(1,k)*fro(i,j)+coef(2,k)*gro(i,j)
+       gro(i,j)=fro(i,j)
+       rou(i,j)=rou(i,j)+coef(1,k)*fru(i,j)+coef(2,k)*gru(i,j)
+       gru(i,j)=fru(i,j)
+       rov(i,j)=rov(i,j)+coef(1,k)*frv(i,j)+coef(2,k)*grv(i,j)
+       grv(i,j)=frv(i,j)
+       roe(i,j)=roe(i,j)+coef(1,k)*fre(i,j)+coef(2,k)*gre(i,j)
+       gre(i,j)=fre(i,j)
+       scp(i,j)=scp(i,j)+coef(1,k)*ftp(i,j)+coef(2,k)*gtp(i,j)
+       gtp(i,j)=ftp(i,j)
      enddo
   enddo
 
@@ -535,8 +557,8 @@ subroutine adams(rho,rou,rov,roe,fro,gro,fru,gru,frv,grv,&
   real(8) :: dlt,ct1,ct2
   integer :: nx,ny,i,j
           
-  ct1=1.5*dlt
-  ct2=0.5*dlt
+  ct1=1.5*dlt !constant 3/2 before phi^n
+  ct2=0.5*dlt !constant -1/2 before phi^(n-1)
   do j=1,ny
      do i=1,nx
         rho(i,j)=rho(i,j)+ct1*fro(i,j)-ct2*gro(i,j)
