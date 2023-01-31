@@ -35,7 +35,7 @@ program navierstokes
 
   ! AB2 temporal scheme itemp=1
   ! RK3 temporal scheme itemp=2
-  itemp=2
+  itemp=1
 
 
   ! Subroutine for the initialisation of the variables 
@@ -47,7 +47,7 @@ program navierstokes
   dy=yly/ny !mesh sixe in y
   ! CFL=0.25  !CFL number for time step
   !Task 2 and Task 3: Change CFL to 0.75
-  CFL = 0.75
+  CFL = 0.25
   dlt=CFL*dlx
   print *,'The time step of the simulation is',dlt
   
@@ -303,16 +303,17 @@ subroutine derix4(phi,nx,ny,dfi,xlx)
   integer :: i,j,nx,ny
 
   dlx=xlx/nx
-  udx=1./(12.*dlx)
+  udx=1./(12*dlx)
   do j=1,ny
-     dfi(1,j)=udx*(-phi(3,j)+8*phi(2,j)-8*Phi(nx,j)+Phi(nx-1,j))
-     dfi(2,j)=udx*(-phi(4,j)+8*Phi(3,j)-8*phi(1,j)+Phi(nx,j))
+     dfi(1,j)=udx*(-phi(3,j)+8.0*phi(2,j)-8.0*phi(nx,j)+phi(nx-1,j))
+     dfi(2,j)=udx*(-phi(4,j)+8.0*phi(3,j)-8.0*phi(1,j)+phi(nx,j))
      do i=3,nx-2
-        dfi(i,j)=udx*(-phi(i+2,j)+8*Phi(i+1,j)-8*phi(i-1,j)+Phi(i-2,j))
+        dfi(i,j)=udx*(-phi(i+2,j)+8.0*phi(i+1,j)-8.0*phi(i-1,j)+phi(i-2,j))
      enddo
-     dfi(1,j)=udx*(-phi(3,j)+8*phi(2,j)-8*Phi(nx,j)+Phi(nx-1,j))
-     dfi(nx,j)=udx*(phi(1,j)-phi(nx-1,j))
+     dfi(nx-1,j)=udx*(-phi(1,j)+8.0*phi(nx,j)-8.0*phi(nx-2,j)+phi(nx-3,j))
+     dfi(nx,j)=udx*(-phi(2,j)+8.0*phi(1,j)-8.0*phi(nx-1,j)+phi(nx-2,j))
   enddo
+
 
 	
   return
@@ -331,7 +332,23 @@ subroutine deriy4(phi,nx,ny,dfi,yly)
   real(8),dimension(nx,ny) ::  phi,dfi
   real(8) :: dly,yly,udy
   integer :: i,j,nx,ny
-	
+
+  dly=yly/ny
+  udy=1./(12*dly)
+  do j=3,ny-2
+     do i=1,nx
+        dfi(i,j)=udy*(-phi(i,j+2)+8.0*phi(i,j+1)-8.0*phi(i,j-1)+phi(i,j-2))
+     enddo
+  enddo
+
+  do i=1,nx
+   dfi(i,1)=udy*(-phi(i,3)+8.0*phi(i,2)-8.0*phi(i,ny)+phi(i,ny-1))
+   dfi(i,2)=udy*(-phi(i,4)+8.0*phi(i,3)-8.0*phi(i,1)+phi(i,ny))
+   dfi(i,ny-1)=udy*(-phi(i,1)+8.0*phi(i,ny)-8.0*phi(i,ny-2)+phi(i,ny-3))
+   dfi(i,ny)=udy*(-phi(i,2)+8.0*phi(i,1)-8.0*phi(i,ny-1)+phi(i,ny-2))
+
+  enddo
+
 
 	
   return
@@ -350,6 +367,21 @@ subroutine derxx4(phi,nx,ny,dfi,xlx)
   real(8),dimension(nx,ny) ::  phi,dfi
   real(8) :: dlx,xlx,udx
   integer :: i,j,nx,ny
+
+  dlx=xlx/nx
+  udx=1./(12*dlx*dlx)
+  do j=1,ny
+     dfi(1,j)=udx*(-phi(3,j)+16.*phi(2,j)-30.*phi(1,j)+16.*phi(nx,j)-phi(nx-1,j))
+     dfi(2,j)=udx*(-phi(4,j)+16.*phi(3,j)-30.*phi(2,j)+16.*phi(1,j)-phi(nx,j))
+     do i=3,nx-2
+       dfi(i,j)=udx*(-phi(i+2,j)+16.*phi(i+1,j)-30.*phi(i,j)+16.*phi(i-1,j)-phi(i-2,j))
+     enddo
+     dfi(nx-1,j)=udx*(-phi(1,j)+16.*phi(nx,j)-30.*phi(nx-1,j)+16.*phi(nx-2,j)-phi(nx-3,j))
+     dfi(nx,j)=udx*(-phi(2,j)+16.*phi(1,j)-30.*phi(nx,j)+16.*phi(nx-1,j)-phi(nx-2,j))
+  enddo
+
+
+
 
 
 	
@@ -370,8 +402,31 @@ subroutine deryy4(phi,nx,ny,dfi,yly)
   real(8) :: dly,yly,udy
   integer :: i,j,nx,ny
 
+  dly=yly/ny
+  udy=1./(12*dly*dly)
+  do j=1,ny
+     dfi(1,j)=udy*(-phi(3,j)+16.*phi(2,j)-30.*phi(1,j)+16.*phi(nx,j)-phi(nx-1,j))
+     dfi(2,j)=udy*(-phi(4,j)+16.*phi(3,j)-30.*phi(2,j)+16.*phi(1,j)-phi(nx,j))
+     do i=3,nx-2
+       dfi(i,j)=udy*(-phi(i+2,j)+16.*phi(i+1,j)-30.*phi(i,j)+16.*phi(i-1,j)-phi(i-2,j))
+     enddo
+     dfi(nx-1,j)=udy*(-phi(1,j)+16.*phi(nx,j)-30.*phi(nx-1,j)+16.*phi(nx-2,j)-phi(nx-3,j))
+     dfi(nx,j)=udy*(-phi(2,j)+16.*phi(1,j)-30.*phi(nx,j)+16.*phi(nx-1,j)-phi(nx-2,j))
+  enddo
 
-	
+  do j=3,ny-2
+   do i=1,nx
+      dfi(i,j)=udy*(-phi(i,j+2)+16.*phi(i,j+1)-30.*phi(i,j)+16.*phi(i,j-1)-phi(i,j-2))
+   enddo
+enddo
+do i=1,nx
+   dfi(i,1)=udy*(-phi(i,3)+16.*phi(i,2)-30.*phi(i,1)+16.*phi(i,ny)-phi(i,ny-1))
+   dfi(i,2)=udy*(-phi(i,4)+16.*phi(i,3)-30.*phi(i,2)+16.*phi(i,1)-phi(i,ny))
+   dfi(i,ny-1)=udy*(-phi(i,1)+16.*phi(i,ny)-30.*phi(i,ny-1)+16.*phi(i,ny-2)-phi(i,ny-3))
+   dfi(i,ny)=udy*(-phi(i,2)+16.*phi(i,1)-30.*phi(i,ny)+16.*phi(i,ny-1)-phi(i,ny-2))
+enddo
+
+
   return
 end subroutine deryy4
 !############################################
@@ -392,8 +447,8 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
   real(8) :: utt,qtt,xmu,eta,dmu,xlx,yly,xba,xkt
   integer :: i,j,nx,ny
 
-  call derix(rou,nx,ny,tb1,xlx)
-  call deriy(rov,nx,ny,tb2,yly)
+  call derix4(rou,nx,ny,tb1,xlx)
+  call deriy4(rov,nx,ny,tb2,yly)
   do j=1,ny
      do i=1,nx
         fro(i,j)=-tb1(i,j)-tb2(i,j)
@@ -407,13 +462,13 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
      enddo
   enddo
 	
-  call derix(pre,nx,ny,tb3,xlx)
-  call derix(tb1,nx,ny,tb4,xlx)
-  call deriy(tb2,nx,ny,tb5,yly)
-  call derxx(uuu,nx,ny,tb6,xlx)
-  call deryy(uuu,nx,ny,tb7,yly)
-  call derix(vvv,nx,ny,tb8,xlx)
-  call deriy(tb8,nx,ny,tb9,yly)
+  call derix4(pre,nx,ny,tb3,xlx)
+  call derix4(tb1,nx,ny,tb4,xlx)
+  call deriy4(tb2,nx,ny,tb5,yly)
+  call derxx4(uuu,nx,ny,tb6,xlx)
+  call deryy4(uuu,nx,ny,tb7,yly)
+  call derix4(vvv,nx,ny,tb8,xlx)
+  call deriy4(tb8,nx,ny,tb9,yly)
   utt=1./3
   qtt=4./3
   do j=1,ny
@@ -431,13 +486,13 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
      enddo
   enddo
 	
-  call deriy(pre,nx,ny,tb3,yly)
-  call derix(tb1,nx,ny,tb4,xlx)
-  call deriy(tb2,nx,ny,tb5,yly)
-  call derxx(vvv,nx,ny,tb6,xlx)
-  call deryy(vvv,nx,ny,tb7,yly)
-  call derix(uuu,nx,ny,tb8,xlx)
-  call deriy(tb8,nx,ny,tb9,yly)
+  call deriy4(pre,nx,ny,tb3,yly)
+  call derix4(tb1,nx,ny,tb4,xlx)
+  call deriy4(tb2,nx,ny,tb5,yly)
+  call derxx4(vvv,nx,ny,tb6,xlx)
+  call deryy4(vvv,nx,ny,tb7,yly)
+  call derix4(uuu,nx,ny,tb8,xlx)
+  call deriy4(tb8,nx,ny,tb9,yly)
   do j=1,ny
      do i=1,nx
         tbb(i,j)=xmu*(tb6(i,j)+qtt*tb7(i,j)+utt*tb9(i,j))
@@ -448,10 +503,10 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
 !
 !Equation for the tempature
 !
-  call derix(scp,nx,ny,tb1,xlx)
-  call deriy(scp,nx,ny,tb2,yly)
-  call derxx(scp,nx,ny,tb3,xlx)
-  call deryy(scp,nx,ny,tb4,yly)
+  call derix4(scp,nx,ny,tb1,xlx)
+  call deriy4(scp,nx,ny,tb2,yly)
+  call derxx4(scp,nx,ny,tb3,xlx)
+  call deryy4(scp,nx,ny,tb4,yly)
 
   do j=1,ny
      do i=1,nx
@@ -461,10 +516,10 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
      enddo
   enddo
   
-  call derix(uuu,nx,ny,tb1,xlx)
-  call deriy(vvv,nx,ny,tb2,yly)
-  call deriy(uuu,nx,ny,tb3,yly)
-  call derix(vvv,nx,ny,tb4,xlx)
+  call derix4(uuu,nx,ny,tb1,xlx)
+  call deriy4(vvv,nx,ny,tb2,yly)
+  call deriy4(uuu,nx,ny,tb3,yly)
+  call derix4(vvv,nx,ny,tb4,xlx)
   dmu=2./3*xmu
   do j=1,ny
      do i=1,nx
@@ -484,12 +539,12 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
      enddo
   enddo
 
-  call derix(tb1,nx,ny,tb5,xlx)
-  call derix(tb2,nx,ny,tb6,xlx)
-  call deriy(tb3,nx,ny,tb7,yly)
-  call deriy(tb4,nx,ny,tb8,yly)
-  call derxx(tmp,nx,ny,tb9,xlx)
-  call deryy(tmp,nx,ny,tba,yly)
+  call derix4(tb1,nx,ny,tb5,xlx)
+  call derix4(tb2,nx,ny,tb6,xlx)
+  call deriy4(tb3,nx,ny,tb7,yly)
+  call deriy4(tb4,nx,ny,tb8,yly)
+  call derxx4(tmp,nx,ny,tb9,xlx)
+  call deryy4(tmp,nx,ny,tba,yly)
    
   do j=1,ny
      do i=1,nx
