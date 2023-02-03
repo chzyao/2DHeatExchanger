@@ -1,6 +1,6 @@
 set terminal png
 set output 'v01.png'
-set xr[0:12] #0.025
+set xr[0:20] #0.025
 set yr[0:12]  #0.15
 set cbrange [-0.25:0.25]
 unset colorbox
@@ -18,12 +18,12 @@ set xtics out
 set ytics out
 set pm3d map
 #set pm3d interpolate 0,0
-set size 0.707,1
+set size 1,1
 splot 'vort0001' u 1:2:3
 reset
 set terminal png
 set output 'v02.png'
-set xr[0:12] #0.025
+set xr[0:20] #0.025
 set yr[0:12]  #0.15
 set cbrange [-0.25:0.25]
 unset colorbox
@@ -41,12 +41,12 @@ set xtics out
 set ytics out
 set pm3d map
 #set pm3d interpolate 0,0
-set size 0.707,1
+set size 1,1
 splot 'vort0002' u 1:2:3
 reset
 set terminal png
 set output 'v03.png'
-set xr[0:12] #0.025
+set xr[0:20] #0.025
 set yr[0:12]  #0.15
 set cbrange [-0.25:0.25]
 unset colorbox
@@ -64,12 +64,12 @@ set xtics out
 set ytics out
 set pm3d map
 #set pm3d interpolate 0,0
-set size 0.707,1
+set size 1,1
 splot 'vort0003' u 1:2:3
 reset
 set terminal png
 set output 'v04.png'
-set xr[0:12] #0.025
+set xr[0:20] #0.025
 set yr[0:12]  #0.15
 set cbrange [-0.25:0.25]
 unset colorbox
@@ -87,5 +87,5 @@ set xtics out
 set ytics out
 set pm3d map
 #set pm3d interpolate 0,0
-set size 0.707,1
+set size 1,1
 splot 'vort0004' u 1:2:3

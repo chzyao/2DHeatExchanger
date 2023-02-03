@@ -8,7 +8,7 @@ program navierstokes
 !
   implicit none   !-->all the variables MUST be declared
 !
-  integer,parameter :: nx=129,ny=129,nt=10000,ns=3,nf=3,mx=nf*nx,my=nf*ny
+  integer,parameter :: nx=513,ny=257,nt=10000,ns=3,nf=3,mx=nf*nx,my=nf*ny
   !size of the computational domain (nx x ny) 
   !size of the exchanger (mx x my)
   !number of time step for the simulation
@@ -679,7 +679,9 @@ subroutine initl(uuu,vvv,rho,eee,pre,tmp,rou,rov,roe,nx,ny,&
 !##########CYLINDER DEFINITION#########################################
   do j=1,ny
      do i=1,nx
-        if (((i*dlx-xlx/2.)**2+(j*dly-yly/2.)**2).lt.radius**2) then
+        ! Originally i*dlx-xlx/2.
+        ! Changed for new domain for Q6
+        if (((i*dlx-xlx/4.)**2+(j*dly-yly/2.)**2).lt.radius**2) then
            eps(i,j)=1.
         else
            eps(i,j)=0.
@@ -730,8 +732,9 @@ subroutine param(xlx,yly,xmu,xba,gma,chp,roi,cci,d,tpi,chv,uu0)
   gma=1.4
 	
   chv=chp/gma
-  xlx=4.*d
-  yly=4.*d
+  ! new numerical domain
+  xlx=20.*d ! Changed for Q6
+  yly=12.*d
   uu0=mach*cci
   xmu=roi*uu0*d/ren
   xba=xmu*chp/pdl
