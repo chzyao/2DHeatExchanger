@@ -13,10 +13,10 @@ import matplotlib.colors as colors
 
 nx=387
 ny=387
-lx=12
+lx=20
 ly=12
 
-X=np.linspace(0,12,num=nx)
+X=np.linspace(0,20,num=nx)
 Y=np.linspace(0,12,num=ny)
 cmap=plt.get_cmap('jet')
 

@@ -8,7 +8,7 @@ program navierstokes
 !
   implicit none   !-->all the variables MUST be declared
 !
-  integer,parameter :: nx=129,ny=129,nt=10000,ns=3,nf=3,mx=nf*nx,my=nf*ny
+  integer,parameter :: nx=513,ny=257,nt=10000,ns=3,nf=3,mx=nf*nx,my=nf*ny
   !size of the computational domain (nx x ny) 
   !size of the exchanger (mx x my)
   !number of time step for the simulation
@@ -50,6 +50,9 @@ program navierstokes
   CFL = 0.25
   dlt=CFL*dlx
   print *,'The time step of the simulation is',dlt
+
+  call boundary(uuu,vvv,rho,eee,pre,tmp,rou,rov,roe,nx,ny,xlx,yly, &
+       xmu,xba,gma,chp,dlx,eta,eps,scp,xkt,uu0,dlt);
   
   !Computation of the average velocity and temperature at t=0
   call average(uuu,um0,nx,ny)
@@ -191,11 +194,18 @@ subroutine derix(phi,nx,ny,dfi,xlx)
   dlx=xlx/nx
   udx=1./(dlx+dlx)
   do j=1,ny
-     dfi(1,j)=udx*(phi(2,j)-phi(nx,j))
+     ! For periodic BC
+     ! dfi(1,j)=udx*(phi(2,j)-phi(nx,j))
+     
+     ! For one-sided BC
+     dfi(1,j)=udx*(2.*phi(2,j)-2.*phi(nx,j))
      do i=2,nx-1
         dfi(i,j)=udx*(phi(i+1,j)-phi(i-1,j))
      enddo
-     dfi(nx,j)=udx*(phi(1,j)-phi(nx-1,j))
+     ! For period BC
+     ! dfi(nx,j)=udx*(phi(1,j)-phi(nx-1,j))
+     dfi(nx,j)=udx*(2.*phi(nx,j)-2.*phi(nx-1,j))
+
   enddo
 	
   return
@@ -247,12 +257,18 @@ subroutine derxx(phi,nx,ny,dfi,xlx)
   dlx=xlx/nx
   udx=1./(dlx*dlx)
   do j=1,ny
-     dfi(1,j)=udx*(phi(2,j)-(phi(1,j)+phi(1,j))+phi(nx,j))
+     ! For periodic BC
+     ! dfi(1,j)=udx*(phi(2,j)-(phi(1,j)+phi(1,j))+phi(nx,j))
+     ! Modified for one-sided BC
+     dfi(1,j)=udx*(phi(3,j)-2.*phi(2,j)+phi(1,j))
      do i=2,nx-1
         dfi(i,j)=udx*(phi(i+1,j)-(phi(i,j)+phi(i,j))&
              +phi(i-1,j))
      enddo
-     dfi(nx,j)=udx*(phi(1,j)-(phi(nx,j)+phi(nx,j))+phi(nx-1,j))
+     ! For periodic BC
+     ! dfi(nx,j)=udx*(phi(1,j)-(phi(nx,j)+phi(nx,j))+phi(nx-1,j))
+     ! Modified for one-sided BC
+     dfi(nx,j)=udx*(phi(nx,j)-2.*phi(nx-1,j)+phi(nx-2,j))
   enddo
 	
   return
@@ -447,8 +463,8 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
   real(8) :: utt,qtt,xmu,eta,dmu,xlx,yly,xba,xkt
   integer :: i,j,nx,ny
 
-  call derix4(rou,nx,ny,tb1,xlx)
-  call deriy4(rov,nx,ny,tb2,yly)
+  call derix(rou,nx,ny,tb1,xlx)
+  call deriy(rov,nx,ny,tb2,yly)
   do j=1,ny
      do i=1,nx
         fro(i,j)=-tb1(i,j)-tb2(i,j)
@@ -462,13 +478,13 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
      enddo
   enddo
 	
-  call derix4(pre,nx,ny,tb3,xlx)
-  call derix4(tb1,nx,ny,tb4,xlx)
-  call deriy4(tb2,nx,ny,tb5,yly)
-  call derxx4(uuu,nx,ny,tb6,xlx)
-  call deryy4(uuu,nx,ny,tb7,yly)
-  call derix4(vvv,nx,ny,tb8,xlx)
-  call deriy4(tb8,nx,ny,tb9,yly)
+  call derix(pre,nx,ny,tb3,xlx)
+  call derix(tb1,nx,ny,tb4,xlx)
+  call deriy(tb2,nx,ny,tb5,yly)
+  call derxx(uuu,nx,ny,tb6,xlx)
+  call deryy(uuu,nx,ny,tb7,yly)
+  call derix(vvv,nx,ny,tb8,xlx)
+  call deriy(tb8,nx,ny,tb9,yly)
   utt=1./3
   qtt=4./3
   do j=1,ny
@@ -486,13 +502,13 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
      enddo
   enddo
 	
-  call deriy4(pre,nx,ny,tb3,yly)
-  call derix4(tb1,nx,ny,tb4,xlx)
-  call deriy4(tb2,nx,ny,tb5,yly)
-  call derxx4(vvv,nx,ny,tb6,xlx)
-  call deryy4(vvv,nx,ny,tb7,yly)
-  call derix4(uuu,nx,ny,tb8,xlx)
-  call deriy4(tb8,nx,ny,tb9,yly)
+  call deriy(pre,nx,ny,tb3,yly)
+  call derix(tb1,nx,ny,tb4,xlx)
+  call deriy(tb2,nx,ny,tb5,yly)
+  call derxx(vvv,nx,ny,tb6,xlx)
+  call deryy(vvv,nx,ny,tb7,yly)
+  call derix(uuu,nx,ny,tb8,xlx)
+  call deriy(tb8,nx,ny,tb9,yly)
   do j=1,ny
      do i=1,nx
         tbb(i,j)=xmu*(tb6(i,j)+qtt*tb7(i,j)+utt*tb9(i,j))
@@ -503,10 +519,10 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
 !
 !Equation for the tempature
 !
-  call derix4(scp,nx,ny,tb1,xlx)
-  call deriy4(scp,nx,ny,tb2,yly)
-  call derxx4(scp,nx,ny,tb3,xlx)
-  call deryy4(scp,nx,ny,tb4,yly)
+  call derix(scp,nx,ny,tb1,xlx)
+  call deriy(scp,nx,ny,tb2,yly)
+  call derxx(scp,nx,ny,tb3,xlx)
+  call deryy(scp,nx,ny,tb4,yly)
 
   do j=1,ny
      do i=1,nx
@@ -516,10 +532,10 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
      enddo
   enddo
   
-  call derix4(uuu,nx,ny,tb1,xlx)
-  call deriy4(vvv,nx,ny,tb2,yly)
-  call deriy4(uuu,nx,ny,tb3,yly)
-  call derix4(vvv,nx,ny,tb4,xlx)
+  call derix(uuu,nx,ny,tb1,xlx)
+  call deriy(vvv,nx,ny,tb2,yly)
+  call deriy(uuu,nx,ny,tb3,yly)
+  call derix(vvv,nx,ny,tb4,xlx)
   dmu=2./3*xmu
   do j=1,ny
      do i=1,nx
@@ -539,12 +555,12 @@ subroutine fluxx(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,tb1,tb2,tb3,&
      enddo
   enddo
 
-  call derix4(tb1,nx,ny,tb5,xlx)
-  call derix4(tb2,nx,ny,tb6,xlx)
-  call deriy4(tb3,nx,ny,tb7,yly)
-  call deriy4(tb4,nx,ny,tb8,yly)
-  call derxx4(tmp,nx,ny,tb9,xlx)
-  call deryy4(tmp,nx,ny,tba,yly)
+  call derix(tb1,nx,ny,tb5,xlx)
+  call derix(tb2,nx,ny,tb6,xlx)
+  call deriy(tb3,nx,ny,tb7,yly)
+  call deriy(tb4,nx,ny,tb8,yly)
+  call derxx(tmp,nx,ny,tb9,xlx)
+  call deryy(tmp,nx,ny,tba,yly)
    
   do j=1,ny
      do i=1,nx
@@ -679,7 +695,9 @@ subroutine initl(uuu,vvv,rho,eee,pre,tmp,rou,rov,roe,nx,ny,&
 !##########CYLINDER DEFINITION#########################################
   do j=1,ny
      do i=1,nx
-        if (((i*dlx-xlx/2.)**2+(j*dly-yly/2.)**2).lt.radius**2) then
+        ! Originally i*dlx-xlx/2.
+        ! Changed for new domain for Q6
+        if (((i*dlx-xlx/4.)**2+(j*dly-yly/2.)**2).lt.radius**2) then
            eps(i,j)=1.
         else
            eps(i,j)=0.
@@ -730,8 +748,9 @@ subroutine param(xlx,yly,xmu,xba,gma,chp,roi,cci,d,tpi,chv,uu0)
   gma=1.4
 	
   chv=chp/gma
-  xlx=4.*d
-  yly=4.*d
+  ! new numerical domain
+  xlx=20.*d ! Changed for Q6
+  yly=12.*d
   uu0=mach*cci
   xmu=roi*uu0*d/ren
   xba=xmu*chp/pdl
@@ -769,3 +788,47 @@ subroutine etatt(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,gma,chp)
   return
 end subroutine etatt
 !################################################################
+
+
+
+! Subroutine for enforcing the inlet and outlet boundaries
+!###########################################################
+!
+subroutine boundary(uuu,vvv,rho,eee,pre,tmp,rou,rov,roe,nx,ny,&
+   xlx,yly,xmu,xba,gma,chp,dlx,eta,eps,scp,xkt,uu0,dlt)
+!
+!###########################################################
+
+implicit none
+
+real(8),dimension(nx,ny) :: uuu,vvv,rho,eee,pre,tmp,rou,rov,roe,eps,scp
+real(8) :: xlx,yly,xmu,xba,gma,chp,roi,cci,d,tpi,chv,uu0
+real(8) :: dlx,dlt,ct1,ct2,eta
+real(8) :: xkt
+integer :: nx,ny,j
+
+call param(xlx,yly,xmu,xba,gma,chp,roi,cci,d,tpi,chv,uu0)
+
+ct1 = uu0*dlt/dlx;
+ct2 = 1-ct1;
+
+
+do j=1,ny
+      ! Inlet BC
+      rho(1,j)=roi
+      rou(1,j)=rho(1,j)*uuu(1,j)
+      rov(1,j)=rho(1,j)*vvv(1,j)
+      roe(1,j)=rho(1,j)*eee(1,j)
+      scp(1,j)=1.
+   
+      ! Outlet BC
+      rho(nx,j)=ct2*rho(nx,j)+ct1*rho(nx-1,j)
+      rou(nx,j)=ct2*rou(nx,j)+ct1*rou(nx-1,j)
+      rov(nx,j)=ct2*rov(nx,j)+ct1*rov(nx-1,j)
+      roe(nx,j)=ct2*roe(nx,j)+ct1*roe(nx-1,j)
+      scp(nx,j)=ct2*scp(nx,j)+ct1*scp(nx-1,j)
+
+
+enddo
+return
+end subroutine boundary
