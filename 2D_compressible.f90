@@ -8,7 +8,7 @@ program navierstokes
 !
   implicit none   !-->all the variables MUST be declared
 !
-  integer,parameter :: nx=513,ny=257,nt=10000,ns=3,nf=3,mx=nf*nx,my=nf*ny
+  integer,parameter :: nx=513,ny=257,nt=30000,ns=3,nf=3,mx=nf*nx,my=nf*ny
   !size of the computational domain (nx x ny) 
   !size of the exchanger (mx x my)
   !number of time step for the simulation
@@ -31,7 +31,7 @@ program navierstokes
 !*******************************************
   !Name of the file for visualisation:
 990 format('vort',I4.4)
-  imodulo=2500 !snapshots to be saved every imodulo time steps
+  imodulo=6000 !snapshots to be saved every imodulo time steps
 
   ! AB2 temporal scheme itemp=1
   ! RK3 temporal scheme itemp=2
@@ -52,7 +52,7 @@ program navierstokes
   print *,'The time step of the simulation is',dlt
 
   call boundary(uuu,vvv,rho,eee,pre,tmp,rou,rov,roe,nx,ny,xlx,yly, &
-       xmu,xba,gma,chp,dlx,eta,eps,scp,xkt,uu0,dlt);
+       xmu,xba,gma,chp,dlx,eta,eps,scp,xkt,uu0,dlt)
   
   !Computation of the average velocity and temperature at t=0
   call average(uuu,um0,nx,ny)
@@ -70,9 +70,17 @@ program navierstokes
 
         call adams(rho,rou,rov,roe,fro,gro,fru,gru,frv,grv,&
              fre,gre,ftp,gtp,scp,nx,ny,dlt)
+
+        ! Enforce BC after each time step
+        call boundary(uuu,vvv,rho,eee,pre,tmp,rou,rov,roe,nx,ny,xlx,yly, &
+             xmu,xba,gma,chp,dlx,eta,eps,scp,xkt,uu0,dlt)
         
         call etatt(uuu,vvv,rho,pre,tmp,rou,rov,roe,nx,ny,gma,chp)
-        
+
+      !   ! Enforce BC after each time step
+      !   call boundary(uuu,vvv,rho,eee,pre,tmp,rou,rov,roe,nx,ny,xlx,yly, &
+      !        xmu,xba,gma,chp,dlx,eta,eps,scp,xkt,uu0,dlt)
+             
      endif
         
      if (itemp.eq.2) then !TEMPORAL SCHEME RK3
