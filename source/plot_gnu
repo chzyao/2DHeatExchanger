@@ -19,7 +19,7 @@ set ytics out
 set pm3d map
 #set pm3d interpolate 0,0
 set size 1,1
-splot 'vort0001' u 1:2:3
+splot 'vort0001.dat' u 1:2:3
 reset
 set terminal png
 set output 'v02.png'
@@ -42,7 +42,7 @@ set ytics out
 set pm3d map
 #set pm3d interpolate 0,0
 set size 1,1
-splot 'vort0002' u 1:2:3
+splot 'vort0002.dat' u 1:2:3
 reset
 set terminal png
 set output 'v03.png'
@@ -65,7 +65,7 @@ set ytics out
 set pm3d map
 #set pm3d interpolate 0,0
 set size 1,1
-splot 'vort0003' u 1:2:3
+splot 'vort0003.dat' u 1:2:3
 reset
 set terminal png
 set output 'v04.png'
@@ -88,7 +88,7 @@ set ytics out
 set pm3d map
 #set pm3d interpolate 0,0
 set size 1,1
-splot 'vort0004' u 1:2:3
+splot 'vort0004.dat' u 1:2:3
 
 
 reset
@@ -113,4 +113,4 @@ set ytics out
 set pm3d map
 #set pm3d interpolate 0,0
 set size 1,1
-splot 'vort0005' u 1:2:3
+splot 'vort0005.dat' u 1:2:3

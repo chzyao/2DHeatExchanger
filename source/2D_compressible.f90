@@ -32,7 +32,7 @@ program navierstokes
   character(len=20) nfichier
 !*******************************************
   !Name of the file for visualisation:
-990 format('vort',I4.4)
+990 format('vort',I4.4,'.dat')
   imodulo=6000 !snapshots to be saved every imodulo time steps
 
   ! AB2 temporal scheme itemp=1
