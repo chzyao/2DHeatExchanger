@@ -1,5 +1,7 @@
 !==========================================================
-!  2D Navier-Stokes equation solver by Sylvain Laizet, 2014
+!  First version: 2D Navier-Stokes equation solver by Sylvain Laizet, 2014
+!  Upgraded by Chris, 2023
+!  Latest Edition by Chris, May 2024
 !==========================================================
 
 !START OF THE MAIN PROGRAM
